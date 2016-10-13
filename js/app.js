@@ -15,13 +15,13 @@ function initVideo() {
             console.log(this);
             if(this.paused) {
                 this.play();
-                this.parentNode.className = "videoItem play";
+                // this.parentNode.className = "videoItem play";
             } else {
                 this.pause();
-                this.parentNode.className = "videoItem pause";
+                // this.parentNode.className = "videoItem pause";
             }
         };
 
-        video.parentNode.className = "videoItem pause";
+        // video.parentNode.className = "videoItem pause";
     }
 }
