@@ -1,49 +1,50 @@
 "use strict";
 
-window.onload = function() {
-    initVideo2();
-    console.log("Done.");
-};
+document.addEventListener('DOMContentLoaded', bootstrap);
 
+function bootstrap() {
+    initVideo();
+    console.log(
+        "%c ᕕ(˵•̀෴•́˵)ᕗ",
+        'font-size: 15pt; padding: 75px 55px; line-height: 205px; ' +
+        'background: none,url(http://i.imgur.com/KnWUMK2.gif); color: rgba(255, 255, 255, 0.8);'
+    )
 
-function initVideo2() {
+}
+
+/*
+ Basic structure of n-Frames
+ + div .videoFrame
+ |
+ +- video
+ |
+ +-+ ul .videoControls
+ |
+ + li (play)
+ + li (pause)
+ * li (+ / -)
+ */
+function initVideo() {
     var frames = document.getElementsByClassName('videoFrame');
-    for(var i = 0; i < frames.length; i++) {
+    for (var i = 0; i < frames.length; i++) {
         var element = frames.item(i);
-        setupVideo(element);
         setupButtons(element);
     }
-
     /*
      Basic structure of n-Frames
-        + div .videoFrame
-        |
-        +- video
-        |
-        +-+ ul .videoControls
-          |
-          + li (play)
-          + li (pause)
-          * li (+ / -)
+     + div .videoFrame
+     |
+     +- video
+     |
+     +-+ ul .videoControls
+     |
+     + li (play)
+     + li (pause)
+     * li (+ / -)
      */
 
 
 }
-
-function setupVideo(element) {
-    var video = element.getElementsByTagName("video")[0];
-    console.log(video);
-    video.onclick = function() {
-        if (this.paused) {
-            this.play();
-            // this.parentNode.className = "videoItem play";
-        } else {
-            this.pause();
-            // this.parentNode.className = "videoItem pause";
-        }
-    }
-}
-
 
 function setupButtons(element) {
     var video = element.getElementsByTagName("video")[0];
@@ -54,8 +55,8 @@ function setupButtons(element) {
     var forward = element.getElementsByClassName("next")[0];
     var fullscreen = element.getElementsByClassName("fullscreen")[0];
 
-    var videoPlay = function() {
-        if(video.paused) {
+    var videoPlay = function () {
+        if (video.paused) {
             video.play();
             play.innerText = "pause"
         } else {
@@ -64,7 +65,7 @@ function setupButtons(element) {
         }
     };
 
-    video.onended = function() {
+    video.onended = function () {
         play.innerText = "play_arrow";
     };
 
@@ -72,15 +73,15 @@ function setupButtons(element) {
 
     play.onclick = videoPlay;
 
-    stop.onclick = function() {
+    stop.onclick = function () {
         video.pause();
         video.currentTime = 0;
         play.innerText = "play_arrow"
     };
 
-    backward.onclick = function() {
+    backward.onclick = function () {
         var stamp = video.currentTime - (video.duration / 10);
-        if(stamp < 0) {
+        if (stamp < 0) {
             video.currentTime = 0;
         } else if (stamp > video.duration) {
             video.currentTime = video.duration;
@@ -88,9 +89,9 @@ function setupButtons(element) {
         video.currentTime = stamp;
     };
 
-    forward.onclick = function() {
+    forward.onclick = function () {
         var stamp = video.currentTime + (video.duration / 10);
-        if(stamp < 0) {
+        if (stamp < 0) {
             video.currentTime = 0;
         } else if (stamp > video.duration) {
             video.currentTime = video.duration;
@@ -98,24 +99,24 @@ function setupButtons(element) {
         video.currentTime = stamp;
     };
 
-    fullscreen.onclick = function() {
-        if(video.requestFullscreen) {
+    fullscreen.onclick = function () {
+        if (video.requestFullscreen) {
             video.requestFullscreen();
-        } else if(video.mozRequestFullscreen) {
+        } else if (video.mozRequestFullscreen) {
             video.mozRequestFullscreen();
-        } else if(video.webkitRequestFullscreen) {
+        } else if (video.webkitRequestFullscreen) {
             video.webkitRequestFullscreen();
-        } else if(video.msRequestFullscreen) {
+        } else if (video.msRequestFullscreen) {
             video.msRequestFullscreen();
         }
     };
 
     /* To justify myself, in case someone reads that:
-       There is an ontimeupdate event, but it's restricted to update between 4hz and 66hz (sic!), based on the
-       event loop timing of the DOM. In most browsers this sucks ass and looks super choppy. So, what do we do?
-       We just update that every 33ms - which makes it look smooth.
+     There is an ontimeupdate event, but it's restricted to update between 4hz and 66hz (sic!), based on the
+     event loop timing of the DOM. In most browsers this sucks ass and looks super choppy. So, what do we do?
+     We just update that every 33ms - which makes it look smooth.
      */
-    setInterval(function() {
+    setInterval(function () {
         progressBar.style.width = video.currentTime / video.duration * 100 + "%";
     }, 33)
 }

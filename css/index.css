@@ -208,13 +208,6 @@ hr {
     user-select: none;
 }
 
-.ic-play, .ic-stop {
-    width: 17px;
-    height: 16px;
-    background-size: 14px;
-
-}
-
 @media all and (max-width: 435px) and (orientation: portrait) {
     .controls-container, .video-details-container {
         padding: 0 20px;
@@ -391,12 +384,12 @@ html {
 }
 
 ::-moz-selection {
-    background: #b3d4fc;
+    background: #cc8687;
     text-shadow: none;
 }
 
 ::selection {
-    background: #b3d4fc;
+    background: #cc8687;
     text-shadow: none;
 }
 
@@ -454,42 +447,10 @@ a {
     font-weight: 500;
 }
 
-.mdl-button:focus:not(:active) {
-    background-color: rgba(0, 0, 0, .12);
-}
-
 @supports (-webkit-appearance:none) {
 }
 
 @supports (pointer-events:auto) {
-}
-
-.mdl-slider.is-upgraded:focus:not(:active)::-webkit-slider-thumb {
-    box-shadow: 0 0 0 10px rgba(63, 81, 181, .26);
-}
-
-.mdl-slider.is-upgraded:focus:not(:active)::-moz-range-thumb {
-    box-shadow: 0 0 0 10px rgba(63, 81, 181, .26);
-}
-
-.mdl-slider.is-upgraded:focus:not(:active)::-ms-thumb {
-    background: radial-gradient(circle closest-side, #3f51b5 0%, #3f51b5 37.5%, rgba(63, 81, 181, .26) 37.5%, rgba(63, 81, 181, .26) 100%);
-    transform: scale(1);
-}
-
-.mdl-slider.is-upgraded.is-lowest-value:focus:not(:active)::-webkit-slider-thumb {
-    box-shadow: 0 0 0 10px rgba(0, 0, 0, .12);
-    background: rgba(0, 0, 0, .12);
-}
-
-.mdl-slider.is-upgraded.is-lowest-value:focus:not(:active)::-moz-range-thumb {
-    box-shadow: 0 0 0 10px rgba(0, 0, 0, .12);
-    background: rgba(0, 0, 0, .12);
-}
-
-.mdl-slider.is-upgraded.is-lowest-value:focus:not(:active)::-ms-thumb {
-    background: radial-gradient(circle closest-side, rgba(0, 0, 0, .12) 0%, rgba(0, 0, 0, .12) 25%, rgba(0, 0, 0, .26) 25%, rgba(0, 0, 0, .26) 37.5%, rgba(0, 0, 0, .12) 37.5%, rgba(0, 0, 0, .12) 100%);
-    transform: scale(1);
 }
 
 .mdl-shadow--4dp {
