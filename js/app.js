@@ -4,13 +4,9 @@ document.addEventListener('DOMContentLoaded', bootstrap);
 
 function bootstrap() {
     initVideo();
-    console.log(
-        "%c ᕕ(˵•̀෴•́˵)ᕗ",
-        'font-size: 15pt; padding: 75px 55px; line-height: 205px; ' +
-        'background: none,url(http://i.imgur.com/KnWUMK2.gif); color: rgba(255, 255, 255, 0.8);'
-    )
-
+    finish(0);
 }
+
 
 /*
  Basic structure of n-Frames
@@ -119,4 +115,21 @@ function setupButtons(element) {
     setInterval(function () {
         progressBar.style.width = video.currentTime / video.duration * 100 + "%";
     }, 33)
+}
+
+function finish(n) {
+    var elements = [
+        "//i.imgur.com/KnWUMK2.gif", "//i.imgur.com/g2H7ygS.gif", "//i.imgur.com/3yzmA2S.gif",
+        "//i.imgur.com/nVJXCxo.gif", "//i.imgur.com/zTeCKbU.gif", "//i.imgur.com/aYMCJFM.gif",
+        "//i.imgur.com/RYgqqnr.gif", "//i.imgur.com/EVPBjCu.gif", "//i.imgur.com/azyruE3.gif"
+    ];
+
+    var i = new Image;
+    i.onload = function() {
+        var padding = "padding: " + this.height / 100 * 45 + "px " + this.width / 2 + "px;";
+        console.log("%c", padding + "line-height:" + (this.height + 20) + "px; background: none, url(" + this.src + "); color: transparent;");
+        console.log("%c> when your js actually works",  'font-size: 20pt;color:#212121;text-shadow:0 1px 0#ccc,0 2px 0  #c9c9c9 ,0 3px 0  #bbb ,0 4px 0  #b9b9b9 ,0 5px 0  #aaa ,0 6px 1px rgba(0,0,0,.1),0 0 5px rgba(0,0,0,.1),0 1px 3px rgba(0,0,0,.3),0 3px 5px rgba(0,0,0,.2),0 5px 10px rgba(0,0,0,.25),0 10px 10px rgba(0,0,0,.2),0 20px 20px rgba(0,0,0,.15);')
+    };
+    n = n || Math.floor(Math.random() * elements.length);
+    i.src = elements[n];
 }
