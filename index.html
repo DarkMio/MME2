@@ -3,44 +3,134 @@
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>This is some title.</title>
+    <title>µTube</title>
+    <!--
     <link rel="stylesheet" href="css/material.min.css" content="text/css">
     <link rel="stylesheet" href="css/app.css" content="text/css">
+    @TODO: Might want to rename that css file when done.
+    -->
+
+    <link rel="stylesheet" href="css/index.css" content="text/css">
+
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <script src="js/material.min.js" content="text/js"></script>
     <script src="js/app.js" content="text/js"></script>
 </head>
 <body>
-<div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
-    <div class="mdl-layout__drawer">
-        <span class="mdl-layout__title">Material Design Lite</span>
-        <nav class="mdl-navigation">
-            <a class="mdl-navigation__link" href="#">Hello</a>
-            <a class="mdl-navigation__link" href="#">World.</a>
-            <a class="mdl-navigation__link" href="#">How</a>
-            <a class="mdl-navigation__link" href="#">Are</a>
-            <a class="mdl-navigation__link" href="#">You?</a>
-        </nav>
-    </div>
-    <main class="mdl-layout__content">
+<div class="main mdl-components mdl-js-components mdl-cell mdl-cell--12-col">
+    <aside class="mdl-components__nav docs-text-styling mdl-shadow--4dp">
+        <a href="" class="mdl-components__link mdl-component badges">
+            <div class="mdl-components__link-image" style="background-image: url('img/comp_badges.png')"></div>
+            <span class="mdl-components__link-text">Badges</span>
+        </a>
+
+        <a href="" class="mdl-components__link mdl-component buttons">
+            <div class="mdl-components__link-image" style="background-image: url('img/comp_badges.png')"></div>
+            <span class="mdl-components__link-text">Buttons</span>
+        </a>
+
+        <a href="" class="mdl-components__link mdl-component cards">
+            <div class="mdl-components__link-image" style="background-image: url('img/comp_badges.png')"></div>
+            <span class="mdl-components__link-text">Cards</span>
+        </a>
+
+        <a href="" class="mdl-components__link mdl-component chips">
+            <div class="mdl-components__link-image" style="background-image: url('img/comp_badges.png')"></div>
+            <span class="mdl-components__link-text">Chips</span>
+        </a>
+
+        <a href="" class="mdl-components__link mdl-component dialog">
+            <div class="mdl-components__link-image" style="background-image: url('img/comp_badges.png')"></div>
+            <span class="mdl-components__link-text">Dialogs</span>
+        </a>
+
+        <a href="" class="mdl-components__link mdl-component layout">
+            <div class="mdl-components__link-image" style="background-image: url('img/comp_badges.png')"></div>
+            <span class="mdl-components__link-text">Layout</span>
+        </a>
+
+        <a href="" class="mdl-components__link mdl-component lists">
+            <div class="mdl-components__link-image" style="background-image: url('img/comp_badges.png')"></div>
+            <span class="mdl-components__link-text">Lists</span>
+        </a>
+
+        <a href="" class="mdl-components__link mdl-component loading">
+            <div class="mdl-components__link-image" style="background-image: url('img/comp_badges.png')"></div>
+            <span class="mdl-components__link-text">Loading</span>
+        </a>
+
+        <a href="" class="mdl-components__link mdl-component menus">
+            <div class="mdl-components__link-image" style="background-image: url('img/comp_badges.png')"></div>
+            <span class="mdl-components__link-text">Menus</span>
+        </a>
+
+        <a href="" class="mdl-components__link mdl-component sliders">
+            <div class="mdl-components__link-image" style="background-image: url('img/comp_badges.png')"></div>
+            <span class="mdl-components__link-text">Sliders</span>
+        </a>
+    </aside>
+    <main class="mdl-components__pages">
+        <section class="mdl-components-index mdl-components__page is-active">
         <div class="mdl-grid">
             <div class="mdl-cell mdl-cell--4-col">
                 <div class="videoFrame">
                     <video>
                         <source src="vid/FlusteredFinishedKillifish.webm" type="video/webm">
                     </video>
-                    <ul class="videoControls">
-                        <li>|></li>
-                        <li>||</li>
-                        <li>+ / -</li>
-                    </ul>
+                    <div class="outside-hover-container container--active">
+                        <div class="progress-bar-hover flex-center">
+                            <div class="progress-bar-highlighted"></div>
+                            <div class="progress-bar">
+                                <div class="progress"></div>
+                            </div>
+                        </div>
+                        <div class="controls-container">
+                            <span class="left">
+                                <i class="ic ic-step-backward"></i>
+                                <i class="ic ic-play"></i>
+                                <i class="ic ic-stop"></i>
+                                <i class="ic ic-step-forward"></i>
+                            </span>
+                            <span class="right">
+                                <i class="ic ic-full-screen"></i>
+                            </span>
+                        </div>
+                        <div class="video-details-container">
+                            <div class="left-block"><span class="video-tag">Getting home</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="mdl-cell mdl-cell--4-col">
-                <div class=videoFrame">
+                <div class="videoFrame">
                     <video>
                         <source src="vid/GrandMenacingIndianelephant.webm" type="video/webm">
                     </video>
+
+                    <div class="outside-hover-container container--active">
+                        <div class="progress-bar-hover flex-center">
+                            <div class="progress-bar-highlighted"></div>
+                            <div class="progress-bar">
+                                <div class="progress"></div>
+                            </div>
+                        </div>
+                        <div class="controls-container">
+                            <span class="left">
+                                <i class="ic ic-step-backward"></i>
+                                <i class="ic ic-play"></i>
+                                <i class="ic ic-stop"></i>
+                                <i class="ic ic-step-forward"></i>
+                            </span>
+                            <span class="right">
+                                <i class="ic ic-full-screen"></i>
+                            </span>
+                        </div>
+                        <div class="video-details-container">
+                            <div class="left-block"><span class="video-tag" >Climbers on Mount Rainier</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="mdl-cell mdl-cell--4-col">
@@ -48,9 +138,34 @@
                     <video>
                         <source src="vid/YellowPrestigiousCatfish.webm" type="video/webm">
                     </video>
+
+                    <div class="outside-hover-container container--active">
+                        <div class="progress-bar-hover flex-center">
+                            <div class="progress-bar-highlighted"></div>
+                            <div class="progress-bar">
+                                <div class="progress"></div>
+                            </div>
+                        </div>
+                        <div class="controls-container">
+                            <span class="left">
+                                <i class="ic ic-step-backward"></i>
+                                <i class="ic ic-play"></i>
+                                <i class="ic ic-stop"></i>
+                                <i class="ic ic-step-forward"></i>
+                            </span>
+                            <span class="right">
+                                <i class="ic ic-full-screen"></i>
+                            </span>
+                        </div>
+                        <div class="video-details-container">
+                            <div class="left-block"><span class="video-tag">Climbers on Mount Rainier</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+        </section>
     </main>
 </div>
 </body>
