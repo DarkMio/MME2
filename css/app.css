@@ -259,6 +259,7 @@ hr {
 
 .mdl-components .mdl-components__link {
     margin: 0 16px;
+    width: 72%;
     font-weight: 400;
     color: rgba(0, 0, 0, .66);
     position: relative;
@@ -266,6 +267,10 @@ hr {
     min-height: 34px;
     display: table;
     text-decoration: none;
+}
+
+.mdl-components .mdl-components__link:hover {
+    background-color: #efefef;
 }
 
 .mdl-components .mdl-components__link-text {
