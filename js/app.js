@@ -47,25 +47,25 @@ function setupVideo(element) {
 
 function setupButtons(element) {
     var video = element.getElementsByTagName("video")[0];
-    var play = element.getElementsByClassName("ic-play")[0];
-    var stop = element.getElementsByClassName("ic-stop")[0];
+    var play = element.getElementsByClassName("play")[0];
+    var stop = element.getElementsByClassName("stop")[0];
     var progressBar = element.getElementsByClassName("progress")[0];
-    var backward = element.getElementsByClassName("ic-step-backward")[0];
-    var forward = element.getElementsByClassName("ic-step-forward")[0];
-    var fullscreen = element.getElementsByClassName("ic-full-screen")[0];
+    var backward = element.getElementsByClassName("previous")[0];
+    var forward = element.getElementsByClassName("next")[0];
+    var fullscreen = element.getElementsByClassName("fullscreen")[0];
 
     var videoPlay = function() {
         if(video.paused) {
             video.play();
-            play.className = "ic ic-pause";
+            play.innerText = "pause"
         } else {
             video.pause();
-            play.className = "ic ic-play";
+            play.innerText = "play_arrow"
         }
     };
 
     video.onended = function() {
-        play.className = "ic ic-play";
+        play.innerText = "play_arrow";
     };
 
     video.onclick = videoPlay;
@@ -75,7 +75,7 @@ function setupButtons(element) {
     stop.onclick = function() {
         video.pause();
         video.currentTime = 0;
-        play.className = "ic ic-play";
+        play.innerText = "play_arrow"
     };
 
     backward.onclick = function() {
