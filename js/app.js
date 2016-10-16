@@ -98,8 +98,8 @@ function setupButtons(element) {
     fullscreen.onclick = function () {
         if (video.requestFullscreen) {
             video.requestFullscreen();
-        } else if (video.mozRequestFullscreen) {
-            video.mozRequestFullscreen();
+        } else if (video.mozRequestFullScreen) {
+            video.mozRequestFullScreen();
         } else if (video.webkitRequestFullscreen) {
             video.webkitRequestFullscreen();
         } else if (video.msRequestFullscreen) {
