@@ -42,8 +42,7 @@ hr {
     visibility: visible;
     opacity: .1;
     z-index: 1;
-    padding-bottom: 60px;
-    min-width: 300px;
+    padding: 0 10px 20px 10px;
     max-width: 100vw;
     transition: opacity .25s linear;
 }
@@ -123,7 +122,7 @@ hr {
 }
 
 .left .ic {
-    margin-right: 20px;
+    margin-right: 10px;
 }
 
 .right {
@@ -208,12 +207,6 @@ hr {
     user-select: none;
 }
 
-@media all and (max-width: 435px) and (orientation: portrait) {
-    .controls-container, .video-details-container {
-        padding: 0 20px;
-    }
-}
-
 @media screen and (max-width: 737px) {
     .video-details-container {
         -webkit-flex-direction: column;
@@ -234,7 +227,7 @@ hr {
 .mdl-components-index {
     box-sizing: border-box;
     position: relative;
-    padding-top: 64px;
+    padding-top: 40px;
 }
 
 .mdl-components .mdl-components__nav {
@@ -254,12 +247,11 @@ hr {
     -webkit-flex-grow: 1;
     -ms-flex-positive: 1;
     flex-grow: 1;
-    padding-bottom: 120px;
 }
 
 .mdl-components .mdl-components__link {
     margin: 0 16px;
-    width: 72%;
+    width: 72.5%;
     font-weight: 400;
     color: rgba(0, 0, 0, .66);
     position: relative;
@@ -311,7 +303,7 @@ hr {
     width: 23px;
 }
 
-@media (max-width: 850px) {
+@media (max-width: 839px) {
 
     hr {
         display: none;
@@ -463,13 +455,15 @@ a {
     display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
+    width: 100%;
+    min-width: 245px;
     -webkit-flex-flow: row wrap;
     -ms-flex-flow: row wrap;
     flex-flow: row wrap;
     margin: 0 auto;
-    -webkit-align-items: stretch;
-    -ms-flex-align: stretch;
-    align-items: stretch;
+    -webkit-align-items: flex-start;
+    -ms-flex-align: start;
+    align-items: flex-start;
 }
 
 .mdl-cell {
@@ -541,3 +535,22 @@ a {
     src: local('Material Icons'), local('MaterialIcons-Regular'), url(https://fonts.gstatic.com/s/materialicons/v18/2fcrYFNaTjcS6g4U3t-Y5StnKWgpfO2iSkLzTz-AABg.ttf) format('truetype');
 }
 
+
+
+/* finally the footer */
+
+footer {
+    background: #212121;
+    padding: 25px 0;
+    color: #e5e5e5;
+}
+
+footer ul {
+    justify-content: center;
+    display: flex;
+    list-style: none;
+}
+
+footer ul li {
+    padding: 0 15px;
+}
