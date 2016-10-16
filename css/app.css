@@ -2,6 +2,18 @@ video {
     width: 100%;
 }
 
+.videoControls {
+    list-style-type: none;
+    width: 100%;
+}
+
+.videoControls li {
+    display: inline-flex;
+    margin: 0 auto;
+    padding: 5px;
+    border: 1px gray solid;
+}
+
 /*
 
 * {
