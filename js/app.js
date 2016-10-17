@@ -4,42 +4,15 @@ document.addEventListener('DOMContentLoaded', bootstrap);
 
 function bootstrap() {
     initVideo();
-    finish(0);
+    finish();
 }
 
-
-/*
- Basic structure of n-Frames
- + div .videoFrame
- |
- +- video
- |
- +-+ ul .videoControls
- |
- + li (play)
- + li (pause)
- * li (+ / -)
- */
 function initVideo() {
     var frames = document.getElementsByClassName('videoFrame');
     for (var i = 0; i < frames.length; i++) {
         var element = frames.item(i);
         setupButtons(element);
     }
-    /*
-     Basic structure of n-Frames
-     + div .videoFrame
-     |
-     +- video
-     |
-     +-+ ul .videoControls
-     |
-     + li (play)
-     + li (pause)
-     * li (+ / -)
-     */
-
-
 }
 
 function setupButtons(element) {
@@ -61,13 +34,11 @@ function setupButtons(element) {
         }
     };
 
+    play.onclick = videoPlay;
+    video.onclick = videoPlay;
     video.onended = function () {
         play.innerText = "play_arrow";
     };
-
-    video.onclick = videoPlay;
-
-    play.onclick = videoPlay;
 
     stop.onclick = function () {
         video.pause();
@@ -75,27 +46,30 @@ function setupButtons(element) {
         play.innerText = "play_arrow"
     };
 
-    backward.onclick = function () {
-        var stamp = video.currentTime - (video.duration / 10);
+    var timeSkip = function (operation) {
+        var stamp = operation(video.currentTime, video.duration / 10);
         if (stamp < 0) {
             video.currentTime = 0;
         } else if (stamp > video.duration) {
             video.currentTime = video.duration;
         }
         video.currentTime = stamp;
+    };
+
+    backward.onclick = function () {
+        timeSkip(function (left, right) {
+            return left - right
+        })
     };
 
     forward.onclick = function () {
-        var stamp = video.currentTime + (video.duration / 10);
-        if (stamp < 0) {
-            video.currentTime = 0;
-        } else if (stamp > video.duration) {
-            video.currentTime = video.duration;
-        }
-        video.currentTime = stamp;
+        timeSkip(function (left, right) {
+            return left + right
+        })
     };
 
     fullscreen.onclick = function () {
+        // a fall through method to try fullscreen in various browsers - note the capital S in moz/firefox.
         if (video.requestFullscreen) {
             video.requestFullscreen();
         } else if (video.mozRequestFullScreen) {
@@ -125,10 +99,19 @@ function finish(n) {
     ];
 
     var i = new Image;
-    i.onload = function() {
+    i.onload = function () {
         var padding = "padding: " + this.height / 100 * 45 + "px " + this.width / 2 + "px;";
-        console.log("%c", padding + "line-height:" + (this.height + 20) + "px; background: none, url(" + this.src + "); color: transparent;");
-        console.log("%c> when your js actually works",  'font-size: 20pt;color:#212121;text-shadow:0 1px 0#ccc,0 2px 0  #c9c9c9 ,0 3px 0  #bbb ,0 4px 0  #b9b9b9 ,0 5px 0  #aaa ,0 6px 1px rgba(0,0,0,.1),0 0 5px rgba(0,0,0,.1),0 1px 3px rgba(0,0,0,.3),0 3px 5px rgba(0,0,0,.2),0 5px 10px rgba(0,0,0,.25),0 10px 10px rgba(0,0,0,.2),0 20px 20px rgba(0,0,0,.15);')
+        console.log(
+            "%c",
+            padding + "line-height:" + (this.height + 20) + "px; background: none, url(" + this.src + "); " +
+            "color: transparent;");
+        console.log(
+            "%c> when your js actually works",
+            'font-size: 20pt;color:#212121;text-shadow:0 1px 0#ccc,0 2px 0  #c9c9c9 ,0 3px 0  #bbb ,0 4px 0 ' +
+            ' #b9b9b9 ,0 5px 0  #aaa ,0 6px 1px rgba(0,0,0,.1),0 0 5px rgba(0,0,0,.1),0 1px 3px rgba(0,0,0,.3),0' +
+            ' 3px 5px rgba(0,0,0,.2),0 5px 10px rgba(0,0,0,.25),0 10px 10px rgba(0,0,0,.2),0 20px 20px ' +
+            'rgba(0,0,0,.15);'
+        )
     };
     n = n || Math.floor(Math.random() * elements.length);
     i.src = elements[n];
