@@ -2,11 +2,18 @@
 
 document.addEventListener('DOMContentLoaded', bootstrap);
 
+/**
+ * Once all html markup is loaded (post load) methods.
+ */
 function bootstrap() {
     initVideo();
     finish();
 }
 
+
+/**
+ * Searches for all video frames (declared as such in its class) and sets up those.
+ */
 function initVideo() {
     var frames = document.getElementsByClassName('videoFrame');
     for (var i = 0; i < frames.length; i++) {
@@ -15,6 +22,10 @@ function initVideo() {
     }
 }
 
+/**
+ * Give it a video frame and this wires up the buttons up.
+ * @param element a HTML markup of class "videoFrame"
+ */
 function setupButtons(element) {
     var video = element.getElementsByTagName("video")[0];
     var play = element.getElementsByClassName("play")[0];
@@ -91,6 +102,10 @@ function setupButtons(element) {
     }, 33)
 }
 
+/**
+ * Prints into the developer console that the operation finished.
+ * @param n An integer for debugging purposes - selects a certain element.
+ */
 function finish(n) {
     var elements = [
         "//i.imgur.com/KnWUMK2.gif", "//i.imgur.com/g2H7ygS.gif", "//i.imgur.com/3yzmA2S.gif",
