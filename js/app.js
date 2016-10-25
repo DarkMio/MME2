@@ -88,9 +88,10 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         /* To justify myself, in case someone reads that:
-         There is an ontimeupdate event, but it's restricted to update between 4hz and 66hz (sic!), based on the
+         There is an ontimeupdate event, but it's restricted to update between 4hz to 66hz (sic!), based on the
          event loop timing of the DOM. In most browsers this sucks ass and looks super choppy. So, what do we do?
          We just update that every 33ms - which makes it look smooth.
+         Probably could cause issues with too many video groups at once.
          */
         setInterval(function () {
             progressBar.style.width = video.currentTime / video.duration * 100 + "%";
