@@ -4,6 +4,10 @@
     margin: 0;
 }
 
+.bold {
+    font-weight: bold;
+}
+
 .controls-container {
     -ms-flex-wrap: wrap;
     -webkit-flex-wrap: wrap;
