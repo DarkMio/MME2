@@ -17,6 +17,10 @@ hr {
     font-size: 23px !important;
 }
 
+.bold {
+    font-weight: bold;
+}
+
 .ic {
     vertical-align: middle;
 }
