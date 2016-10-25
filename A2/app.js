@@ -4,8 +4,8 @@ var path = require('path');
 var fs = require('fs');
 var fileMemo = function() { // obviously no callback hell.
     var memo = null;
-    return function (callback) {
-        if(memo === null) {
+    return function (callback, forceReload) {
+        if(forceReload === true || memo === null) {
             fs.readFile("./public/data/file.txt", 'utf8', function(err, contents) {
                 if(err) {
                     throw err;
