@@ -20,7 +20,6 @@ var fileMemo = function() { // obviously no callback hell.
 }();
 
 var app = express();
-app.use(express.static(path.join(__dirname, 'public')));
 app.get('/test', function(req, res) {
     console.log("> Serving new request from " + req.connection.remoteAddress);
     res.send('Hello world.');
@@ -38,6 +37,8 @@ app.get('/file.txt', function(req, res) {
     });
 
 });
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.listen(3000, function(){
     console.log("Listening on port 3000.");
