@@ -1,6 +1,6 @@
 "use strict";
 
-function setup(store) {
+function setup(store, host, port) {
     var router = require('express').Router();
 
 
@@ -10,21 +10,19 @@ function setup(store) {
 
     router.post('/', function (req, res, next) {
         if (!('user' in req.body) || !('message' in req.body)) {
-            var err = new Error("fuck off");
+            var err = new Error("Not enough data, go home.");
             err.status = 404;
             next(err);
-            return;
         }
 
         var user = store.select('users', req.body.user);
         if (user === undefined) {
-            var err = new Error("fuck off, no user");
+            var err = new Error("No user found with this id");
             err.status = 404;
             next(err);
-            return;
         }
         var storage = {};
-        storage['creator'] = {'href': "http://" + HOST + ":" + PORT + "/users/" + user.id};
+        storage['creator'] = {'href': "http://" + host + ":" + port + "/users/" + user.id};
         storage['message'] = req.body.message;
 
         var id = store.insert('tweets', storage);
@@ -32,9 +30,14 @@ function setup(store) {
         res.status(201).json(store.select('tweets', id));
     });
 
-
     router.get('/:id', function (req, res, next) {
-        res.json(store.select('tweets', req.params.id));
+        var tweet = store.select('tweets', req.params.id);
+        if(tweet === undefined) {
+            var err = new Error("No tweet with this id found");
+            err.status = 404;
+            next(err);
+        }
+        res.json(tweet);
     });
 
     router.delete('/:id', function (req, res, next) {

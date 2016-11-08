@@ -1,5 +1,5 @@
 "use strict";
-function setup(store) {
+function setup(store, host, port) {
     var router = require('express').Router();
 
     router.get('/', function(req, res, next) {
