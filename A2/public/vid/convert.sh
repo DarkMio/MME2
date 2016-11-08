@@ -1,1 +1,0 @@
-for i in *.avi;do name=`echo $i | cut -d'.' -f1`; echo $name; ffmpeg -i $i -vcodec h264 -acodec aac -strict -2 ./out/$name.mp4; done
