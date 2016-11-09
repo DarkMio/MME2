@@ -2,6 +2,13 @@
 
 function setup(store, host, port) {
     var router = require('express').Router();
+    var util = require('./util.js');
+    var tweetNotFound = new Error("Tweet not found");
+    tweetNotFound.status = 404; // not found
+    var userNotFound = new Error("User not found");
+    userNotFound.status = 404;
+    var notEnoughParams = new Error("Not enough parameters for operation");
+    notEnoughParams.status = 400; // bad request
 
 
     router.get('/', function (req, res, next) {
@@ -10,16 +17,12 @@ function setup(store, host, port) {
 
     router.post('/', function (req, res, next) {
         if (!('user' in req.body) || !('message' in req.body)) {
-            var err = new Error("Not enough data, go home.");
-            err.status = 404;
-            next(err);
+            next(notEnoughParams);
         }
 
         var user = store.select('users', req.body.user);
         if (user === undefined) {
-            var err = new Error("No user found with this id");
-            err.status = 404;
-            next(err);
+            next(userNotFound);
         }
         var storage = {};
         storage['creator'] = user.id;
@@ -27,26 +30,22 @@ function setup(store, host, port) {
 
         var id = store.insert('tweets', storage);
         // set code 201 "created" and send the item back
-        res.status(201).json(store.select('tweets', id));
+        res.status(201).json(util.returnTweet(id));
     });
 
     router.get('/:id', function (req, res, next) {
         var tweet = store.select('tweets', req.params.id);
         if(tweet === undefined) {
-            var err = new Error("No tweet with this id found");
-            err.status = 404;
-            next(err);
+            next(tweetNotFound);
         }
-        res.json(tweet);
+        res.json(util.returnTweet(tweet));
     });
 
     router.delete('/:id', function (req, res, next) {
         try {
             store.remove('tweets', req.params.id);
         } catch (err) {
-            var err = new Error("Tweet not found.");
-            err.status = 404;
-            next(err);
+            next(tweetNotFound);
         }
         res.status(200).end();
     });
@@ -55,9 +54,7 @@ function setup(store, host, port) {
         try {
             store.replace('tweets', req.params.id, req.body);
         } catch(err) {
-            var err = new Error("Tweet not found.");
-            err.status = 404;
-            next(err);
+            next(tweetNotFound);
         }
         res.status(200).end();
     });
