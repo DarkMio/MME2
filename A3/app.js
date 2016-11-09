@@ -68,8 +68,8 @@ app.use(function(req, res, next) {
 });
 
 
-app.use('/tweets', tweets(store, host, port));
-app.use('/users', users(store, host, port));
+app.use('/tweets', tweets(store, HOST, PORT));
+app.use('/users', users(store, HOST, PORT));
 
 // CatchAll for the rest (unfound routes/resources) ********
 app.all("*", function(req, res) {

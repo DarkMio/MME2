@@ -22,7 +22,7 @@ function setup(store, host, port) {
             next(err);
         }
         var storage = {};
-        storage['creator'] = {'href': "http://" + host + ":" + port + "/users/" + user.id};
+        storage['creator'] = user.id;
         storage['message'] = req.body.message;
 
         var id = store.insert('tweets', storage);
@@ -41,12 +41,24 @@ function setup(store, host, port) {
     });
 
     router.delete('/:id', function (req, res, next) {
-        store.remove('tweets', req.params.id);
+        try {
+            store.remove('tweets', req.params.id);
+        } catch (err) {
+            var err = new Error("Tweet not found.");
+            err.status = 404;
+            next(err);
+        }
         res.status(200).end();
     });
 
     router.put('/:id', function (req, res, next) {
-        store.replace('tweets', req.params.id, req.body);
+        try {
+            store.replace('tweets', req.params.id, req.body);
+        } catch(err) {
+            var err = new Error("Tweet not found.");
+            err.status = 404;
+            next(err);
+        }
         res.status(200).end();
     });
 

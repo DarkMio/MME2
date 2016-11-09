@@ -39,6 +39,9 @@ app.get('/file.txt', function(req, res) {
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.all('*', function(req, res, next) {
+    res.send('Hello morld.');
+});
 
 app.listen(3000, function(){
     console.log("Listening on port 3000.");

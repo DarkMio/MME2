@@ -10,6 +10,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Mio Bambino",
+  "author": "Sebastian Nieling, Fabian Wendland, Martin Zier",
   "license": "MIT"
 }

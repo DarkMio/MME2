@@ -5,6 +5,8 @@ function setup(store, host, port) {
     router.get('/', function(req, res, next) {
         return res.json(store.select('users'));
     });
+    
+    
 
     return router;
 }
