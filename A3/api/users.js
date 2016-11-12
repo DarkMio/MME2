@@ -4,14 +4,10 @@ function setup(store, host, port) {
     var util = require("./util.js")(store, host, port);
     var notEnoughParams = new Error("Not enough parameters for operation");
     notEnoughParams.status = 400; // bad request
-    var notFound = new Error("No user found");
-    notFound.status = 404;
 
-    router.get('/', function(req, res, next) {
+    router.get('/', function(req, res) {
         var users = store.select('users');
-        users.forEach(function(T, index) {
-            users[index] = util.returnUser(T);
-        });
+        users.forEach((T, index) => users[index] = util.returnUser(T, util.expandParser(req)));
         res.status(200).json(users);
     });
     
@@ -19,8 +15,7 @@ function setup(store, host, port) {
         if(!('firstname' in req.body || 'lastname' in req.body)){
             next(notEnoughParams);
         }
-        
-        // in place so a retard doesn't do stupid shit >:(
+        // in place so nobody puts more into it than needed
         var object = {};
         object.firstname = req.body.firstname;
         object.lastname = req.body.lastname;
@@ -29,46 +24,55 @@ function setup(store, host, port) {
     });
     
     router.get('/:id', function(req, res, next) {
-        var id = util.checkUser(req.params.id, next);
-        res.status(200).json(util.returnUser(id));
+        util.checkUser(req.params.id, next, (T) => res.status(200).json(util.returnUser(id, util.expandParser(req))));
     });
 
     router.put("/:id", function(req, res, next) {
-        var user = util.checkUser(req.params.id, next);
-        if(!'firstname' in req.body && !'lastname' in req.body){
-            next(notEnoughParams);
-        }
-        if('firstname' in req.body) {
+        util.checkUser(req.params.id, next, (user) => {
+            if(!('firstname' in req.body && 'lastname' in req.body)){
+                next(notEnoughParams);
+                return;
+            }
             user['firstname'] = req.body['firstname'];
-        }
-        if('lastname' in req.body) {
             user['lastname'] = req.body['lastname'];
-        }
+            store.replace("users", req.params.id, user);
+            res.status(200).json(util.returnUser(user));
+        });
+    });
 
-        store.replace("users", req.params.id, user);
-        res.status(200).json(util.returnUser(user));
+    router.patch("/:id", function(req, res, next) {
+        util.checkUser(req.params.id, next, (user) => {
+            if(!'firstname' in req.body && !'lastname' in req.body) {
+                next(notEnoughParams);
+                return;
+            }
+            if('firstname' in req.body) {
+                user['firstname'] = req.body['firstname'];
+            }
+            if('lastname' in req.body) {
+                user['lastname'] = req.body['lastname'];
+            }
+            store.replace("users", req.params.id, user);
+            res.status(200).json(util.returnUser(user));
+        })
     });
 
     router.delete("/:id", function(req, res, next) {
-        util.checkUser(req.params.id, next);
-        store.remove("users", req.params.id);
-        res.status(200).end();
+        util.checkUser(req.params.id, next, (user) => {
+            store.remove("users", user.id);
+            res.status(200).end();
+        });
     });
 
-
     router.get('/:id/tweets', function(req, res, next) {
-        var user = util.checkUser(req.params.id, next);
-        var tweets = store.select('tweets');
-        tweets = tweets
-            .filter(function(T) {
-                return T.user == req.params.id;
+        util.checkUser(req.params.id, next, (user) => {
+            var tweets = store.select('tweets');
+            tweets = tweets.filter((T) => T.user == req.params.id);
+            tweets.forEach((T, index) => tweets[index] = util.returnTweet(T, util.expandParser(req)));
+            res.status(200).json({
+                'id': user.id,
+                'tweets': tweets
             });
-        tweets.forEach(function(T, index) {
-                tweets[index] = util.returnTweet(T);
-            });
-        res.status(200).json({
-            'id': user.id,
-            'tweets': tweets
         });
     });
 

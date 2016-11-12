@@ -23,33 +23,38 @@ module.exports = function(store, host, port) {
 
     /**
      * @param {(object|number)} Tweet Object from storage or its id
-     * @param {object} Response object from node handler
      */
     return {
-        returnTweet: function (tweet, response) {
+        returnTweet: function (tweet, expand) {
             // Basically an input selector if not an object
             if (typeof tweet !== typeof {}) {
                 tweet = store.select('tweets', tweet);
             }
-
-            return {
+            var x = {
                 'id': tweet.id,
                 'message': tweet.message,
                 'user': { // api/users/:id
                     'href': _generateUserPath(tweet.user)
                 }
             };
+            if(expand === true) {
+                var user = store.select('users', tweet.user);
+                for(var key in user) {
+                    //noinspection JSUnfilteredForInLoop
+                    x.user[key] = user[key];
+                }
+            }
+            return x;
         },
 
         /**
          * @param {(object|number)} User Object from storage or its id
-         * @param {object} Response object from node handler
          */
-        returnUser: function (user, response) {
+        returnUser: function (user, expand) {
             if (typeof user !== typeof {}) {
                 user = store.select('users', user);
             }
-            return {
+            var x = {
                 'id': user.id,
                 'firstname': user.firstname,
                 'lastname': user.lastname,
@@ -57,22 +62,39 @@ module.exports = function(store, host, port) {
                     'href': _generateUserPath(user.id) + "/tweets"
                 }
             };
+            if(expand === true) {
+                var obj = this;
+                var collect = store.select('tweets').filter((T) => {return T.user == x.id});
+                collect.forEach((T, index) => collect[index] = obj.returnTweet(T));
+                x.tweets.items = collect;
+            }
+            return x;
         },
-        checkTweet: function(id, next) {
+        checkTweet: function(id, next, onFound) {
             var thing = store.select("tweets", id);
             if(thing === undefined) {
                 next(tweetNotFound);
+                return;
+            } else if(onFound) {
+                onFound(thing);
             }
             return thing;
         },
-        checkUser: function(id, next) {
+        checkUser: function(id, next, onFound) {
             var thing = store.select("users", id);
             if(thing === undefined) {
                 next(userNotFound);
+                return;
+            } else if(onFound) {
+                onFound(thing);
             }
             return thing;
+        },
+        expandParser: function(req) {
+            if(!'expand' in req.query) {
+                return false;
+            }
+            return req.query.expand === 'true';
         }
     }
 };
-
-// @TODO: Check if this works, that it resolves upon loading the public functions
