@@ -10,9 +10,12 @@ function setup(store, host, port) {
     var notEnoughParams = new Error("Not enough parameters for operation");
     notEnoughParams.status = 400; // bad request
 
-
     router.get('/', function (req, res, next) {
-        res.json(store.select('tweets'));
+        var tweets = store.select('tweets');
+        tweets.forEach(function(T, index) {
+            tweets[index] = util.returnTweet(T);
+        });
+        res.status(200).json(tweets);
     });
 
     router.post('/', function (req, res, next) {
@@ -20,10 +23,7 @@ function setup(store, host, port) {
             next(notEnoughParams);
         }
 
-        var user = store.select('users', req.body.user);
-        if (user === undefined) {
-            next(userNotFound);
-        }
+        var user = util.checkUser(req.body.user, next);
         var storage = {};
         storage['user'] = user.id;
         storage['message'] = req.body.message;
@@ -34,31 +34,32 @@ function setup(store, host, port) {
     });
 
     router.get('/:id', function (req, res, next) {
-        var tweet = store.select('tweets', req.params.id);
-        if(tweet === undefined) {
-            next(tweetNotFound);
-        }
+        var tweet = util.checkTweet(req.params.id, next);
         res.json(util.returnTweet(tweet));
     });
 
     router.delete('/:id', function (req, res, next) {
-        try {
-            store.remove('tweets', req.params.id);
-        } catch (err) {
-            next(tweetNotFound);
-        }
+        util.checkTweet(req.params.id, next);
+        store.remove('tweets', req.params.id);
         res.status(200).end();
     });
 
     router.put('/:id', function (req, res, next) {
-        try {
-            store.replace('tweets', req.params.id, req.body);
-        } catch(err) {
-            next(tweetNotFound);
+        var tweet = util.checkTweet(req.params.id, next);
+        if(!'user' in req.body || !'message' in req.body){
+            next(notEnoughParams);
         }
+        if('user' in req.body) {
+            //@todo this shit is broken and idk why
+            util.checkUser(req.body.user, next);
+            tweet['user'] = req.body['user'];
+        }
+        if('message' in req.body) {
+            tweet['message'] = req.body['message'];
+        }
+        store.replace('tweets', req.params.id, tweet);
         res.status(200).end();
     });
-    
 
     return router;
 }

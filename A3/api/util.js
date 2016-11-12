@@ -5,6 +5,11 @@
  * (Please: Get off my lawn!)
  */
 module.exports = function(store, host, port) {
+    var tweetNotFound = new Error("Tweet not found");
+    tweetNotFound.status = 404; // not found
+    var userNotFound = new Error("User not found");
+    userNotFound.status = 404;
+
     function _generateUserPath(id) {
         // could be refactored
         var portName = port == 80 ? "" : ":" + port;
@@ -52,6 +57,20 @@ module.exports = function(store, host, port) {
                     'href': _generateUserPath(user.id) + "/tweets"
                 }
             };
+        },
+        checkTweet: function(id, next) {
+            var thing = store.select("tweets", id);
+            if(thing === undefined) {
+                next(tweetNotFound);
+            }
+            return thing;
+        },
+        checkUser: function(id, next) {
+            var thing = store.select("users", id);
+            if(thing === undefined) {
+                next(userNotFound);
+            }
+            return thing;
         }
     }
 };

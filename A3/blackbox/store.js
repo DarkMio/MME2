@@ -41,7 +41,7 @@ var tweets = [
 ];
 var users = [
     {   id: globalCounter(),
-        firstname: "Super",
+        firstname: "Wonder",
         lastname: "Woman"
     },
     {   id: globalCounter(),
