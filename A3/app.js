@@ -3,9 +3,6 @@
  * already tweets with id 101 and 102, as well as users with id 103 and 104.
  * On each restart the db will be reset (it is only in memory).
  * Best start with GET http://localhost:3000/tweets to see the JSON for it
- *
- * TODO: Start the server and play a little with Postman
- * TODO: Look at the Routes-section (starting line 68) and start there to add your code 
  * 
  * @author Johannes Konert
  * @licence CC BY-SA 4.0
@@ -88,7 +85,7 @@ app.use(function(req, res, next) {
 // development error handler
 // will print stacktrace as JSON response
 if (app.get('env') === 'development') {
-    app.use(function(err, req, res, next) {
+    app.use(function(err, req, res) {
         console.log('Internal Error: ', err.stack);
         res.status(err.status || 500);
         res.json({
@@ -102,7 +99,7 @@ if (app.get('env') === 'development') {
 
 // production error handler
 // no stacktraces leaked to user
-app.use(function(err, req, res, next) {
+app.use(function(err, req, res) {
     res.status(err.status || 500);
     res.json({
         error: {

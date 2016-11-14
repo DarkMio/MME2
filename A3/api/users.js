@@ -1,3 +1,8 @@
+/** Based off the tweets router - basically the same
+ *
+ * @author Sebastian Nieling
+ */
+
 "use strict";
 function setup(store, host, port) {
     var router = require('express').Router();

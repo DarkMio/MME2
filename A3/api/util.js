@@ -3,6 +3,8 @@
  * Please handle with care an do the recommended checks somewhere else.
  * This entire section feels like hammering with a saw - but so does js too
  * (Please: Get off my lawn!)
+ * 
+ * @author Martin Zier
  */
 module.exports = function(store, host, port) {
     var tweetNotFound = new Error("Tweet not found");
@@ -22,7 +24,8 @@ module.exports = function(store, host, port) {
     }
 
     /**
-     * @param {(object|number)} Tweet Object from storage or its id
+     * @param {(object|number)} tweet - Tweet Object from storage or its id
+     * @param {boolean} expand - expands the data set with the correspondent user
      */
     return {
         returnTweet: function (tweet, expand) {
@@ -48,7 +51,8 @@ module.exports = function(store, host, port) {
         },
 
         /**
-         * @param {(object|number)} User Object from storage or its id
+         * @param {(object|number)} user - Object from storage or its id
+         * @param {boolean} expand - expands the data set with correspondent tweets to that user
          */
         returnUser: function (user, expand) {
             if (typeof user !== typeof {}) {

@@ -1,3 +1,10 @@
+/** Tweets Router for paths like /tweets/:id/ etc
+ * This is a refactor of the original source, which featured no checks for any data
+ * and kept throwing 500 Internal Server Errors.
+ * 
+ * @author Fabian Wendland
+ */
+
 "use strict";
 
 function setup(store, host, port) {
@@ -10,7 +17,7 @@ function setup(store, host, port) {
     var notEnoughParams = new Error("Not enough parameters for operation");
     notEnoughParams.status = 400; // bad request
 
-    router.get('/', function (req, res, next) {
+    router.get('/', function (req, res) {
         var tweets = store.select('tweets');
         tweets.forEach(function(T, index) {
             tweets[index] = util.returnTweet(T, util.expandParser(req));
@@ -42,7 +49,7 @@ function setup(store, host, port) {
 
     router.delete('/:id', function (req, res, next) {
         util.checkTweet(req.params.id, next, (tweet) => {
-            store.remove('tweets', req.params.id);
+            store.remove('tweets', tweet.id);
             res.status(200).end();
         });
     });
@@ -79,7 +86,26 @@ function setup(store, host, port) {
         });
     });
 
+    router.get('/:id/author', function(req, res, next){
+        util.checkTweet(req.params.id, next, (tweet) => {
+            res.status(200).json(util.returnUser(tweet.user, util.expandParser(req)));
+        });
+    });
+
     return router;
 }
 
 module.exports = setup;
+
+
+
+
+
+
+
+
+
+
+
+
+
