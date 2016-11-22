@@ -41,7 +41,6 @@ app.use(requestLogger('dev'));
 // API request checks for API-version and JSON etc. (same checks as in Ü3)
 app.use(restAPIchecks);
 
-
 // Routes ******************************************************
 app.use('/videos', videos);
 
