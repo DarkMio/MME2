@@ -160,6 +160,18 @@ videos.use(function(req, res, next){
                 res.locals.items = util.filter(filters, res.locals.items, next);
             }
         }
+        
+        if(req.query['limit'] && Array.isArray(res.locals.items)) {
+            var limit = parseInt(req.query['limit']) || 0;
+            if(limit == 0) {
+                var err = new Error("fucking Limit is weird of missing or idc");
+                err.statusCode = 400;
+                next(err);
+                return;
+            }
+            var offset = parseInt(req.query['offset']) || 0;
+            res.locals.items.splice(offset, limit);
+        }
         // then we send it as json and remove it
         res.json(res.locals.items);
         delete res.locals.items;

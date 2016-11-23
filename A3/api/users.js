@@ -4,9 +4,12 @@
  */
 
 "use strict";
+
+var router = require('express').Router();
+
 function setup(store, host, port) {
-    var router = require('express').Router();
     var util = require("./util.js")(store, host, port);
+
     var notEnoughParams = new Error("Not enough parameters for operation");
     notEnoughParams.status = 400; // bad request
 
@@ -19,6 +22,7 @@ function setup(store, host, port) {
     router.post('/', function (req, res, next) {
         if (!('firstname' in req.body || 'lastname' in req.body)) {
             next(notEnoughParams);
+            return;
         }
         // in place so nobody puts more into it than needed
         var object = {};

@@ -23,6 +23,7 @@ var debug = require('debug')('me2u4:server');
 // own modules
 var store = require('./blackbox/store.js');
 var restAPIchecks = require('./restapi/request-checks.js');
+var postAPIchecks = require('./restapi/post-requests.js');
 var videos = require('./routes/videos');
 
 
@@ -44,7 +45,8 @@ app.use(restAPIchecks);
 // Routes ******************************************************
 app.use('/videos', videos);
 
-
+// Allows filtering, pagination and search criteria of array-responses
+app.use(postAPIchecks);
 
 
 
