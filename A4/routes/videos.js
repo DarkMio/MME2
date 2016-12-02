@@ -24,6 +24,10 @@ var requiredKeys = {title: 'string', src: 'string', length: 'number'};
 var optionalKeys = {description: 'string', playcount: 'number', ranking: 'number'};
 var internalKeys = {id: 'number', timestamp: 'number'};
 
+var errNotAllowed = new Error("Method not allowed");
+errNotAllowed.status = 405;
+
+
 var util /* I don't give a fuck, look at me, I'm a better comment */ = function() {
     var collector = (collection, object) => {
         var stuff = {};
@@ -71,7 +75,7 @@ var util /* I don't give a fuck, look at me, I'm a better comment */ = function(
             var select = store.select('videos', id);
             if(!select) {
                 var err = new Error("Video not fucking found, fuck off.");
-                err.statusCode = 404;
+                err.status = 404;
                 next(err);
                 return
             }
@@ -80,7 +84,7 @@ var util /* I don't give a fuck, look at me, I'm a better comment */ = function(
         filter: (filters, item, next) => {
             if (!filters.every((value) => { return item[value] && item[value] !== 'undefined'})){ // Haha, you thought I would cross 80 characters limits
                 var err = new Error("There is no fucking filter for that.");
-                err.statusCode = 404;
+                err.status = 404;
                 next(err);
             }
             Object.keys(item).forEach((value) => {
@@ -96,8 +100,8 @@ var util /* I don't give a fuck, look at me, I'm a better comment */ = function(
 // routes **********************
 videos.route('/')
     .get((req, res, next) => {
-        res.status(200);
-        res.locals.items = store.select('videos') || [];
+        // res.status(200);
+        res.locals.items = store.select('videos');
         next();
     })
     .post((req,res,next) => {
@@ -105,21 +109,38 @@ videos.route('/')
             res.status(400).send({error: "Fuck off and come back with enough Scheckel."})
         }
         var allKeys = util.collectAllKeys(req);
-        allKeys['timestamp'] =  Math.floor(new Date().getTime() / 1000); // fuck off
+        allKeys['timestamp'] =  Math.floor(new Date().getTime()); // fuck off
+        allKeys['playcount'] = allKeys['playcount'] || 0;
+        allKeys['ranking'] = allKeys['ranking'] || 0;
+        console.log(">>>: " + allKeys['timestamp'] + " | " + allKeys['playcount']  + " | " + allKeys['ranking']);
+        if(allKeys['timestamp'] < 0 || allKeys['playcount'] < 0 || allKeys['ranking'] < 0) {
+            var err = new Error('Bad request parameters.');
+            err.status = 400;
+            next(err);
+        }
         res.status(201);
         allKeys['id'] = store.insert('videos', allKeys); // obviously you fuck
         res.locals.items = allKeys;
         next();
+    })
+    .put((req, res, next) => {
+        next(errNotAllowed);
+    })
+    .patch((req, res, next) => {
+        next(errNotAllowed);
     });
 // TODO
 videos.route('/:id')
     .get((req, res, next) => {
         req.body['id'] = req.body['id'] || req.params.id;
         util.exists(req.body['id'], res, (video) => {
-            res.status(200);
+            // res.status(200);
             res.locals.items = video;
         }, next);
         next();
+    })
+    .post((req, res, next) => {
+        next(errNotAllowed);
     })
     .put((req, res, next) => {
         req.body['id'] = req.body['id'] || req.params.id; // fucking fill this shit up
@@ -132,7 +153,7 @@ videos.route('/:id')
             Object.keys(video).forEach((value) => {
                 video[value] = allKeys[value] || video[value];
             });
-            res.status(200);
+            // res.status(200);
             store.replace('videos', video['id'], video);
             res.locals.items = store.select('videos', video['id'])
         }, next);
@@ -146,7 +167,7 @@ videos.route('/:id')
         next();
     });
 
-
+/*
 // this middleware function can be used, if you like (or remove it)
 videos.use(function(req, res, next){
     // if anything to send has been added to res.locals.items
@@ -165,7 +186,7 @@ videos.use(function(req, res, next){
             var limit = parseInt(req.query['limit']) || 0;
             if(limit == 0) {
                 var err = new Error("fucking Limit is weird of missing or idc");
-                err.statusCode = 400;
+                err.status = 400;
                 next(err);
                 return;
             }
@@ -181,5 +202,5 @@ videos.use(function(req, res, next){
         res.status(204).end(); // no content;
     }
 });
-
+*/
 module.exports = videos;
