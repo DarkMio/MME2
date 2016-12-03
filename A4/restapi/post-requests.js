@@ -134,13 +134,14 @@ router.use(function(req, res, next){
 
     // limit and offset - if there's false / missing input, offset is 0
     if((req.query['limit'] || req.query['offset']) && Array.isArray(res.locals.items)) {
+        var setLimit = !!req.query['limit'];
         if(req.query['limit']) {
-            var limit = parseInt(req.query['limit'] || 0);
+            var limit = parseInt(req.query['limit']) || -1;
         } else {
-            var limit = Math.MAX_SAFE_INTEGER;
+            var limit = -1;
         }
         var offset = parseInt(req.query['offset']);
-        if(limit <= 0 || !Number.isFinite(offset)) {
+        if(limit <= 0 && setLimit) {
             var err = new Error("fucking Limit / Offset is weird of missing or idc");
             err.status = 400;
             next(err);
@@ -158,7 +159,12 @@ router.use(function(req, res, next){
             next(err);
             return;
         }
-        res.locals.items = res.locals.items.splice(offset, limit);
+        if(setLimit === false) {
+            res.locals.items = res.locals.items.splice(offset);
+        } else {
+            res.locals.items = res.locals.items.splice(offset, limit);
+        }
+
     }
 
         
