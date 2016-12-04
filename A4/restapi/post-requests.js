@@ -1,13 +1,14 @@
-var router = require('express').Router();
+"use strict";
+const router = require('express').Router();
 
 /**
- * @param filter Filter criteria
+ * @param filters Filter criteria
  * @param item the item that the filter should be applied on
  * @param next The next handler in case there are some errors.
  **/
-var filter = (filters, item, next) => {
+const filter = (filters, item, next) => {
     if (!filters.every((value) => { return item[value] && item[value] !== 'undefined'; })) { // item[value] && item[value] !== 'undefined'})){
-        var err = new Error("There is no fucking filter for that.");
+        const err = new Error("There is no fucking filter for that.");
         err.status = 400;
         next(err);
         return false;
@@ -20,103 +21,97 @@ var filter = (filters, item, next) => {
     return item;
 };
 
-var moreThanExclusions = (query) => {
-    var exclusionKeywords = ['filter', 'limit', 'offset'];
-    var keys = Object.keys(query);
+const moreThanExclusions = (query) => {
+    const exclusionKeywords = ['filter', 'limit', 'offset'];
+    const keys = Object.keys(query);
     if(keys.length > 3) {
         return true;
     }
-    
-    var hasOtherKeys = false;
     // is anything else in the query than filter/limit?
-    keys.forEach((value, index, array) => {
-        if(exclusionKeywords.indexOf(value) < 0) {
-            hasOtherKeys = true;
-        }
-    });
-    return hasOtherKeys;
+    return !keys.every((value) => { return exclusionKeywords.indexOf(value) > -1; });
 };
 
-var collectNonExclusions = (query) => {
-    var collector = {};
-    var exclusionKeywords = ['filter', 'limit', 'offset'];
+const collectNonExclusions = (query) => {
+    const collector = {};
+    const exclusionKeywords = ['filter', 'limit', 'offset'];
     Object.keys(query).forEach((value) => {
-        if(exclusionKeywords.indexOf(value) >= 0) {
+        if (exclusionKeywords.indexOf(value) < 0) {
             collector[value] = query[value];
         }
     });
     return collector;
-}
+};
 
 /**
  * A router that works through a rest-response answer and does things like
  * filtering, searching and so on.
  * Theoretically it should work on all responses, no matter how big or small
  * the response is.
+ * To produce stable results, we:
+ *  1. search through the dataset and delete all unfitting entries
+ *  2. filter out the result set (interchangeable with 1.)
+ *  3. apply limit and offset of the remaining data
+ *  4. sending out the remaining data
  **/
 router.use(function(req, res, next){
-    // if anything to send has been added to res.locals.items
-        // To produce stable results, we:
-        // 1. search through the dataset and delete all unfitting entries
-        // 2. filter out the result set (interchangeable with 1.)
-        // 3. apply limit and offset of the remaining data
-        // 4. sending out the remaining data
-
     if(!res.locals.items) {
         if(moreThanExclusions(req.query)) {
-            var err = new Error("Result is empty and not searchable");
+            const err = new Error("Result is empty and not searchable");
             err.status = 400;
             next(err);
             return;
         }
         if(req.query['filter']) {
-            var err = new Error("Result is empty and not filterable");
+            const err = new Error("Result is empty and not filterable");
             err.status = 400;
             next(err);
             return;
         }
         if(req.query['limit']) {
-            var err = new Error("Result is empty and not pageable");
+            const err = new Error("Result is empty and not pageable");
             err.status = 400;
             next(err);
             return;
         }
     }
-
     // matching search criteria (for arrays only)
     if(Array.isArray(res.locals.items) && moreThanExclusions(req.query)) {
-        var testValue = res.locals.items[0];
-        var testKeys = Object.keys(testValue);
-        var searchValues = collectNonExclusions(req.query);
-        var searchKeys = Object.keys(searchValues);
+        const testValue = res.locals.items[0];
+        const testKeys = Object.keys(testValue);
+        const searchValues = collectNonExclusions(req.query);
+        const searchKeys = Object.keys(searchValues);
         // do we have search criteria that isn't in the object?
         if(!searchKeys.every((value) => { return testKeys.indexOf(value) >= 0; })) {
-            var err = new Error("1 or more search criteria is not applicable for this type");
+            const err = new Error("1 or more search criteria is not applicable for this type");
             err.status = 400;
             next(err);
             return;
         }
 
         // for each array entry...
+        const collector = [];
         res.locals.items.forEach((entry, index, array) => {
             // value = {"...": "..."}
-            // for each search key...
-            for(var i = 0; i < searchKeys.length; i++) {
-                var searchKey = searchKeys[i];
+            // for each search key...const collector = [];
+            for(let i = 0; i < searchKeys.length; i++) {
+                const searchKey = searchKeys[i];
                 // look up if it matches search criteria
-                if(entry[searchKey] != searchKey[searchKey]) {
+                if(entry[searchKey].toLowerCase().indexOf(req.query[searchKey].toLowerCase()) >= 0) {
                     // if not, throw it away and go to the next one
-                    res.locals.items.splice(index, 1);
-                    break;
+                    // res.locals.items.splice(index, 1);
+                    collector.push(entry);
                 }
             }
+            res.locals.items = collector || null;
         })
     }
+    next();
+});
 
-    // filtering the results if there are any elements to be filtered
+router.use(function(req, res, next) {
     if(req.query['filter']) {
         // ex: "title,src,length"
-        var filters = req.query['filter'].split(',');
+        const filters = req.query['filter'].split(',');
         if (Array.isArray(res.locals.items)) {
             if(filter(filters, res.locals.items[0], next) == false) {
                 return;
@@ -131,30 +126,33 @@ router.use(function(req, res, next){
             res.locals.items = filter(filters, res.locals.items, next);
         }
     }
+    next();
+});
 
-    // limit and offset - if there's false / missing input, offset is 0
+router.use(function(req, res, next) {
     if((req.query['limit'] || req.query['offset']) && Array.isArray(res.locals.items)) {
-        var setLimit = !!req.query['limit'];
+        const setLimit = !!req.query['limit'];
+        let limit;
         if(req.query['limit']) {
-            var limit = parseInt(req.query['limit']) || -1;
+            limit = parseInt(req.query['limit']) || -1;
         } else {
-            var limit = -1;
+            limit = -1;
         }
-        var offset = parseInt(req.query['offset']);
+        const offset = parseInt(req.query['offset']);
         if(limit <= 0 && setLimit) {
-            var err = new Error("fucking Limit / Offset is weird of missing or idc");
+            const err = new Error("fucking Limit / Offset is weird of missing or idc");
             err.status = 400;
             next(err);
             return;
         }
         if(offset < 0) {
-            var err = new Error("Bruh, offset and limit cannot be less than 0 or bogus");
+            const err = new Error("Bruh, offset and limit cannot be less than 0 or bogus");
             err.status = 400;
             next(err);
             return;
         }
         if(offset >= res.locals.items.length) {
-            var err = new Error("Thats a bit far, matey. The result is shorter than your offset.");
+            const err = new Error("Thats a bit far, matey. The result is shorter than your offset.");
             err.status = 400;
             next(err);
             return;
@@ -166,8 +164,11 @@ router.use(function(req, res, next){
         }
 
     }
+    next();
+});
 
-        
+router.use(function(req, res, next){
+
 
     if (res.locals.items) {
         // then we send it as json and remove it
