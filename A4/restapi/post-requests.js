@@ -110,17 +110,20 @@ router.use(function(req, res, next){
         }
 
         // for each array entry...
-        const collector = [];
+        const collector = [].concat(res.locals.items);
         res.locals.items.forEach((entry, index, array) => {
+
+
             // value = {"...": "..."}
             // for each search key...const collector = [];
             for(let i = 0; i < searchKeys.length; i++) {
                 const searchKey = searchKeys[i];
                 // look up if it matches search criteria
-                if(entry[searchKey].toLowerCase().indexOf(req.query[searchKey].toLowerCase()) >= 0) {
+                if(!(entry[searchKey] + "").toLowerCase().indexOf(req.query[searchKey].toLowerCase()) >= 0) {
                     // if not, throw it away and go to the next one
-                    // res.locals.items.splice(index, 1);
-                    collector.push(entry);
+                    collector.splice(index, 1);
+                    break;
+                    //collector.push(entry);
                 }
             }
             res.locals.items = collector || null;
@@ -129,6 +132,10 @@ router.use(function(req, res, next){
     next();
 });
 
+/**
+ * Now we filter our result out by the given criteria.
+ * This works for any object or array.
+ */
 router.use(function(req, res, next) {
     if(req.query['filter']) {
         // ex: "title,src,length"
@@ -150,6 +157,9 @@ router.use(function(req, res, next) {
     next();
 });
 
+/**
+ * And lastly we do the limit and offset. this could be before filtering for performance (probably)
+ */
 router.use(function(req, res, next) {
     if((req.query['limit'] || req.query['offset']) && Array.isArray(res.locals.items)) {
         const setLimit = !!req.query['limit'];
@@ -183,8 +193,6 @@ router.use(function(req, res, next) {
 });
 
 router.use(function(req, res, next){
-
-
     if (res.locals.items) {
         // then we send it as json and remove it
         res.json(res.locals.items);
