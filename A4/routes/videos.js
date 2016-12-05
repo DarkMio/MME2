@@ -27,10 +27,6 @@ const requiredKeys = {title: 'string', src: 'string', length: 'number'};
 const optionalKeys = {description: 'string', playcount: 'number', ranking: 'number'};
 const internalKeys = {id: 'number', timestamp: 'number'};
 
-const errNotAllowed = new Error("Method not allowed");
-errNotAllowed.status = 405;
-
-
 const util /* I don't give a fuck, look at me, I'm a better comment */ = function () {
     const collector = (collection, object) => {
         const stuff = {};
@@ -104,10 +100,17 @@ const util /* I don't give a fuck, look at me, I'm a better comment */ = functio
                 }
             });
             return item;
+        },
+        errorFactory: (msg, status) => {
+            const err = new Error(msg);
+            err.status = status;
+            return err;
         }
     };
     return obj;
 }();
+
+const errNotAllowed = util.errorFactory("Method not allowed", 405);
 
 videos.route('/')
     .get((req, res, next) => {
@@ -123,11 +126,9 @@ videos.route('/')
         allKeys['timestamp'] = Math.floor(new Date().getTime()); // fuck off
         allKeys['playcount'] = allKeys['playcount'] || 0;
         allKeys['ranking'] = allKeys['ranking'] || 0;
-        console.log(">>>: " + allKeys['timestamp'] + " | " + allKeys['playcount'] + " | " + allKeys['ranking']);
         if (allKeys['timestamp'] < 0 || allKeys['playcount'] < 0 || allKeys['ranking'] < 0) {
-            const err = new Error('Bad request parameters.');
-            err.status = 400;
-            next(err);
+            next(util.errorFactory("Bad request parameters", 400));
+            return;
         }
         res.status(201);
         allKeys['id'] = store.insert('videos', allKeys); // obviously you fuck
@@ -157,7 +158,8 @@ videos.route('/:id')
         req.body['id'] = req.body['id'] || req.params.id; // fucking fill this shit up
 
         if (!util.containsRequirements(req)) {
-            res.status(400).send({error: "Fuck off and come back with enough Scheckel and Jewgold."})
+            next(util.errorFactory("Request doesn't contain required fields", 400));
+            return;
         }
         util.exists(req.body['id'], res, (video) => {
             const allKeys = util.collectAllKeys(req);
@@ -190,9 +192,8 @@ videos.route('/:id')
          * This prevents many edge cases, including a client loosing connection and sending multiple increments
          */
         if(req.body['playcount'] !== "+1") {
-            var err = new Error("fuckyouandyourancestors");
-            err.status = 400;
-            next(err);
+            next(util.errorFactory("Patch does not confine the given standard", 400));
+            return;
         }
         util.exists(req.params.id, res, (element) => {
             element.playcount += 1;
