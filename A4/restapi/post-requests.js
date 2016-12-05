@@ -109,25 +109,13 @@ router.use(function(req, res, next){
             return;
         }
 
-        // for each array entry...
-        const collector = [].concat(res.locals.items);
-        res.locals.items.forEach((entry, index, array) => {
-
-
-            // value = {"...": "..."}
-            // for each search key...const collector = [];
-            for(let i = 0; i < searchKeys.length; i++) {
-                const searchKey = searchKeys[i];
-                // look up if it matches search criteria
-                if(!(entry[searchKey] + "").toLowerCase().indexOf(req.query[searchKey].toLowerCase()) >= 0) {
-                    // if not, throw it away and go to the next one
-                    collector.splice(index, 1);
-                    break;
-                    //collector.push(entry);
-                }
-            }
-            res.locals.items = collector || null;
-        })
+        res.locals.items = res.locals.items.filter((entry, index) => {
+            return searchKeys.every((key, number) => {
+                const actual = (entry[key] + "").toLowerCase();
+                const criteria = searchValues[key].toLowerCase();
+                return actual.indexOf(criteria) >= 0;
+            });
+        });
     }
     next();
 });

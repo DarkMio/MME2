@@ -176,6 +176,30 @@ videos.route('/:id')
             store.remove('videos', req.body['id']);
         }, next);
         next();
+    })
+    .patch((req, res, next) => {
+        /**
+         * Note: That's not my fault, but the assignments what's happening in here. :(
+         * Sane recommendation:
+         * Request Header with Session ID
+         * {
+         *  "action": "increment",
+         *  "field": "playcount",
+         *  "actionUUID": some form of hash of session ID + timestamp
+         * }
+         * This prevents many edge cases, including a client loosing connection and sending multiple increments
+         */
+        if(req.body['playcount'] !== "+1") {
+            var err = new Error("fuckyouandyourancestors");
+            err.status = 400;
+            next(err);
+        }
+        util.exists(req.params.id, res, (element) => {
+            element.playcount += 1;
+            store.replace('videos', element['id'], element);
+            res.locals.items = element;
+        });
+        next();
     });
 
 module.exports = videos;
