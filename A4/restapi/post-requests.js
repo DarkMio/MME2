@@ -1,3 +1,15 @@
+/**
+ * A router that works through a rest-response answer and does things like
+ * filtering, searching and so on.
+ * Theoretically it should work on all responses, no matter how big or small
+ * the response is.
+ * To produce stable results, we:
+ *  1. search through the dataset and delete all unfitting entries
+ *  2. filter out the result set (interchangeable with 1.)
+ *  3. apply limit and offset of the remaining data
+ *  4. sending out the remaining data
+ **/
+
 "use strict";
 const router = require('express').Router();
 
@@ -42,38 +54,49 @@ const collectNonExclusions = (query) => {
     return collector;
 };
 
+const errors = function(){
+    const errorFactory = (msg, status) => {
+        const x = new Error(msg);
+        x.status = status;
+        return x;
+    };
+    return {
+        notSearchable: errorFactory("Result is empty and not searchable", 400),
+        notFilterable: errorFactory("Result is empty and not filterable", 400),
+        notPageable: errorFactory("Result is empty and not pageable", 400),
+        notApplicableSearch: errorFactory("One or more search criteria is not applicable for this type", 400),
+        wrongLimit: errorFactory("Limit cannot be less than zero or bogus", 400),
+        wrongOffset: errorFactory("Offset cannot be less than zero or bogus", 400),
+        offsetOverflow: errorFactory("Offset is higher than the result size", 400)
+    }
+}();
+
 /**
- * A router that works through a rest-response answer and does things like
- * filtering, searching and so on.
- * Theoretically it should work on all responses, no matter how big or small
- * the response is.
- * To produce stable results, we:
- *  1. search through the dataset and delete all unfitting entries
- *  2. filter out the result set (interchangeable with 1.)
- *  3. apply limit and offset of the remaining data
- *  4. sending out the remaining data
- **/
-router.use(function(req, res, next){
+ * First and foremost: Catch the obvious error cases - bundles what may end in boiler plate
+ */
+router.use((req, res, next) => {
     if(!res.locals.items) {
         if(moreThanExclusions(req.query)) {
-            const err = new Error("Result is empty and not searchable");
-            err.status = 400;
-            next(err);
+            next(errors.notSearchable);
             return;
         }
         if(req.query['filter']) {
-            const err = new Error("Result is empty and not filterable");
-            err.status = 400;
-            next(err);
+            next(errors.notFilterable);
             return;
         }
         if(req.query['limit']) {
-            const err = new Error("Result is empty and not pageable");
-            err.status = 400;
-            next(err);
+            next(errors.notPageable);
             return;
         }
     }
+    next();
+});
+
+/**
+ * Now we handle the search first - this produces the final result-set and ensures that the client
+ * can set limit and offset on that set - and gets rid of weird behaviour
+ */
+router.use(function(req, res, next){
     // matching search criteria (for arrays only)
     if(Array.isArray(res.locals.items) && moreThanExclusions(req.query)) {
         const testValue = res.locals.items[0];
@@ -82,9 +105,7 @@ router.use(function(req, res, next){
         const searchKeys = Object.keys(searchValues);
         // do we have search criteria that isn't in the object?
         if(!searchKeys.every((value) => { return testKeys.indexOf(value) >= 0; })) {
-            const err = new Error("1 or more search criteria is not applicable for this type");
-            err.status = 400;
-            next(err);
+            next(errors.notApplicableSearch);
             return;
         }
 
@@ -140,21 +161,15 @@ router.use(function(req, res, next) {
         }
         const offset = parseInt(req.query['offset']);
         if(limit <= 0 && setLimit) {
-            const err = new Error("fucking Limit / Offset is weird of missing or idc");
-            err.status = 400;
-            next(err);
+            next(errors.wrongLimit);
             return;
         }
         if(offset < 0) {
-            const err = new Error("Bruh, offset and limit cannot be less than 0 or bogus");
-            err.status = 400;
-            next(err);
+            next(errors.wrongOffset);
             return;
         }
         if(offset >= res.locals.items.length) {
-            const err = new Error("Thats a bit far, matey. The result is shorter than your offset.");
-            err.status = 400;
-            next(err);
+            next(errors.offsetOverflow);
             return;
         }
         if(setLimit === false) {
