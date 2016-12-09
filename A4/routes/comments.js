@@ -1,31 +1,21 @@
-/** This module defines the routes for videos using the store.js as db memory
+/** This module defines the routes for comments using the store.js as db memory
  *
- * @author Johannes Konert
+ * @author Mio Bambino
  * @licence CC BY-SA 4.0
  *
- * @module routes/videos
+ * @module routes/comments
  * @type {Router}
- * I spy with my little eye a guy that's forgetting "USE FUCKING STRICT"
  */
-
 "use strict";
 
-// remember: in modules you have 3 constiables given by CommonJS
-// 1.) require() function
-// 2.) module.exports
-// 3.) exports (which is module.exports)
-
-// modules
 const express = require('express');
-const logger = require('debug')('me2u4:videos');
 const store = require('../blackbox/store');
 
-const videos = express.Router();
+const comments = express.Router();
 
-// if you like, you can use this for task 1.b:
-const requiredKeys = {title: 'string', src: 'string', length: 'number'};
-const optionalKeys = {description: 'string', playcount: 'number', ranking: 'number'};
-const internalKeys = {id: 'number', timestamp: 'number'};
+const requiredKeys = {videoId: 'number', text: 'string'};
+const optionalKeys = {likes: 'number', dislikes: 'number'};
+const internalKeys = {id: 'number', timestamp: 'timestamp'};
 
 const util = function () {
     const collector = (collection, object) => {
@@ -80,8 +70,8 @@ const util = function () {
                 delete req.body[value]
             })
         },
-        exists: (id, res, onTrue, next) => {
-            const select = store.select('videos', id);
+        exists: (id, res, type, onTrue, next) => {
+            const select = store.select(type, id);
             if (!select) {
                 next(obj.errorFactory("Video not found", 404));
                 return
@@ -99,45 +89,43 @@ const util = function () {
 
 const errNotAllowed = util.errorFactory("Method not allowed", 405);
 
-videos.route('/')
+comments.route('/')
     .get((req, res, next) => {
-        res.locals.items = store.select('videos');
+        res.locals.items = store.select('comments');
         next();
     })
     .post((req, res, next) => {
         if (!util.containsRequirements(req)) {
-            next(util.errorFactory("The request does not contain the required fields", 400));
+            next(util.errorFactory('The request does not contain the required fields', 400));
             return;
         }
         const allKeys = util.collectAllKeys(req);
         allKeys['timestamp'] = Math.floor(new Date().getTime());
-        allKeys['playcount'] = allKeys['playcount'] || 0;
-        allKeys['ranking'] = allKeys['ranking'] || 0;
-        if (allKeys['timestamp'] < 0 || allKeys['playcount'] < 0 || allKeys['ranking'] < 0) {
+        allKeys['likes'] |= 0;
+        allKeys['dislikes'] |= 0;
+        if (allKeys['timestamp'] < 0 || allKeys['likes'] < 0 || allKeys['dislikes'] < 0) {
             next(util.errorFactory("Bad request parameters", 400));
             return;
         }
-        allKeys['id'] = store.insert('videos', allKeys); // obviously you fuck
-        res.status(201);
-        res.locals.items = allKeys;
+        util.exists(allKeys['videoId'], res, 'videos', (video) => {
+            allKeys['id'] = store.insert('comments', allKeys);
+            res.status(201);
+            res.locals.items = allKeys;
+        }, next);
         next();
     })
     .put((req, res, next) => {
-        next(errNotAllowed);
-    })
-    .delete((req, res, next) => {
         next(errNotAllowed);
     })
     .patch((req, res, next) => {
         next(errNotAllowed);
     });
 
-videos.route('/:id')
+comments.route('/:id')
     .get((req, res, next) => {
         req.body['id'] = req.body['id'] || req.params.id;
-        util.exists(req.body['id'], res, (video) => {
-            // res.status(200);
-            res.locals.items = video;
+        util.exists(req.body['id'], res, 'comments', (comment) => {
+            res.locals.items = comment;
         }, next);
         next();
     })
@@ -147,55 +135,32 @@ videos.route('/:id')
     .put((req, res, next) => {
         req.body['id'] = req.body['id'] || req.params.id;
 
-        if (!util.containsAllKeys(req)) {
-            next(util.errorFactory("Request doesn't contain required fields", 400));
+        if(!util.containsAllKeys(req)) {
+            next(util.errorFactory('Request doesn\'t contain required fields.', 400));
             return;
         }
-        util.exists(req.body['id'], res, (video) => {
-            const allKeys = util.collectAllKeys(req);
-            Object.keys(video).forEach((value) => {
-                video[value] = allKeys[value];
-            });
-            store.replace('videos', video['id'], video);
-            res.locals.items = store.select('videos', video['id'])
+        util.exists(req.body['id'], res, 'comments', (comment) => {
+            util.exists(req.body['videoId'], res, 'videos', (video) => {
+                // Video and comment indeed exists.
+                const allKeys = util.collectAllKeys(req);
+                Object.keys(comment).forEach((value) => {
+                    comment[value] = allKeys[value];
+                });
+                store.replace('comments', comment['id'], comment);
+                res.locals.items = store.select('comments', comment['id']);
+            }, next)
         }, next);
         next();
     })
     .delete((req, res, next) => {
         req.body['id'] = req.body['id'] || req.params.id;
-        util.exists(req.body['id'], res, () => {
-            const comments = store.select('comments');
-            comments.forEach((value) => {
-                if(value.videoId == req.body['id']) {
-                    store.remove('comments', value.id);
-                }
-            });
-            store.remove('videos', req.body['id']);
+        util.exists(req.body['id'], res, 'comments', (comment) => {
+            store.remove('comments', req.body['id']);
         }, next);
         next();
     })
     .patch((req, res, next) => {
-        /**
-         * Note: That's not my fault, but the assignments what's happening in here. :(
-         * Sane recommendation:
-         * Request Header with Session ID
-         * {
-         *  "action": "increment",
-         *  "field": "playcount",
-         *  "actionUUID": some form of hash of session ID + timestamp
-         * }
-         * This prevents many edge cases, including a client loosing connection and sending multiple increments
-         */
-        if(req.body['playcount'] !== "+1") {
-            next(util.errorFactory("Patch does not confine the given standard", 400));
-            return;
-        }
-        util.exists(req.params.id, res, (element) => {
-            element.playcount += 1;
-            store.replace('videos', element['id'], element);
-            res.locals.items = element;
-        });
-        next();
+        next(errNotAllowed);
     });
 
-module.exports = videos;
+module.exports = comments;

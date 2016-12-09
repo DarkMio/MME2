@@ -25,6 +25,7 @@ var store = require('./blackbox/store.js');
 var restAPIchecks = require('./restapi/request-checks.js');
 var postAPIchecks = require('./restapi/post-requests.js');
 var videos = require('./routes/videos');
+var comments = require('./routes/comments');
 
 
 
@@ -44,6 +45,8 @@ app.use(restAPIchecks);
 
 // Routes ******************************************************
 app.use('/videos', videos);
+app.use('/comments', comments);
+
 
 // Allows filtering, pagination and search criteria of array-responses
 app.use(postAPIchecks);
