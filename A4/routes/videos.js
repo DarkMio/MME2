@@ -27,7 +27,7 @@ const requiredKeys = {title: 'string', src: 'string', length: 'number'};
 const optionalKeys = {description: 'string', playcount: 'number', ranking: 'number'};
 const internalKeys = {id: 'number', timestamp: 'number'};
 
-const util /* I don't give a fuck, look at me, I'm a better comment */ = function () {
+const util = function () {
     const collector = (collection, object) => {
         const stuff = {};
         Object.keys(collection).forEach((value) => {
@@ -48,16 +48,19 @@ const util /* I don't give a fuck, look at me, I'm a better comment */ = functio
 
     const obj = {
         containsRequirements: (req) => {
-            //  Are in                quired fields? Snek
-            return /*s*/Object.keys(/*e*/requiredKeys).every((value) => {
-                return req.body[value] && !req.body[value !== 'undefined'];
+            // select each and check if they're not undefined
+            return Object.keys(requiredKeys).every((value) => {
+                return req.body[value] && !req.body[value != 'undefined'];
             });
-        },//         ide the body all r
+        },
+        containsOptionals: (req) => {
+            // select each and check if they're not undefined
+            return Object.keys(optionalKeys).every((value) => {
+                return req.body[value] && !req.body[value != 'undefined'];
+            });
+        },
         containsAllKeys: (req) => {
-            return obj.containsRequirements &&
-                Object.keys(optionalKeys).every((value) => {
-                    return req.body[value] && !req.body[value !== 'undefined'];
-                });
+            return obj.containsRequirements(req) && obj.containsOptionals(req);
         },
         collectOptionalKeys: (req) => {
             return collector(optionalKeys, req.body);
@@ -68,6 +71,7 @@ const util /* I don't give a fuck, look at me, I'm a better comment */ = functio
         collectAllKeys: (req) => {
             const required = obj.collectOptionalKeys(req);
             const optional = obj.collectRequiredKeys(req);
+            // add each optional to collected required keys and return it
             Object.keys(optional).forEach((value) => required[value] = optional[value]);
             return required;
         },
@@ -79,27 +83,10 @@ const util /* I don't give a fuck, look at me, I'm a better comment */ = functio
         exists: (id, res, onTrue, next) => {
             const select = store.select('videos', id);
             if (!select) {
-                const err = new Error("Video not fucking found, fuck off.");
-                err.status = 404;
-                next(err);
+                next(obj.errorFactory("Video not found", 404));
                 return
             }
             onTrue(select);
-        },
-        filter: (filters, item, next) => {
-            if (!filters.every((value) => {
-                    return item[value] && item[value] !== 'undefined'
-                })) { // Haha, you thought I would cross 80 characters limits
-                const err = new Error("There is no fucking filter for that.");
-                err.status = 404;
-                next(err);
-            }
-            Object.keys(item).forEach((value) => {
-                if (filters.indexOf(value) === -1) {
-                    delete item[value];
-                }
-            });
-            return item;
         },
         errorFactory: (msg, status) => {
             const err = new Error(msg);
@@ -114,13 +101,13 @@ const errNotAllowed = util.errorFactory("Method not allowed", 405);
 
 videos.route('/')
     .get((req, res, next) => {
-        // res.status(200);
         res.locals.items = store.select('videos');
         next();
     })
     .post((req, res, next) => {
         if (!util.containsRequirements(req)) {
-            res.status(400).send({error: "Fuck off and come back with enough Scheckel."})
+            next(util.errorFactory("The request does not contain the required fields", 400));
+            return;
         }
         const allKeys = util.collectAllKeys(req);
         allKeys['timestamp'] = Math.floor(new Date().getTime()); // fuck off
@@ -157,16 +144,15 @@ videos.route('/:id')
     .put((req, res, next) => {
         req.body['id'] = req.body['id'] || req.params.id; // fucking fill this shit up
 
-        if (!util.containsRequirements(req)) {
+        if (!util.containsAllKeys(req)) {
             next(util.errorFactory("Request doesn't contain required fields", 400));
             return;
         }
         util.exists(req.body['id'], res, (video) => {
             const allKeys = util.collectAllKeys(req);
             Object.keys(video).forEach((value) => {
-                video[value] = allKeys[value] || video[value];
+                video[value] = allKeys[value];
             });
-            // res.status(200);
             store.replace('videos', video['id'], video);
             res.locals.items = store.select('videos', video['id'])
         }, next);
