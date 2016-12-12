@@ -147,13 +147,13 @@ videos.route('/:id')
     .put((req, res, next) => {
         req.body['id'] = req.body['id'] || req.params.id;
 
-        if (!util.containsAllKeys(req)) {
+        if (!util.containsRequirements(req)) {
             next(util.errorFactory("Request doesn't contain required fields", 400));
             return;
         }
         util.exists(req.body['id'], res, (video) => {
             const allKeys = util.collectAllKeys(req);
-            Object.keys(video).forEach((value) => {
+            Object.keys(allKeys).forEach((value) => {
                 video[value] = allKeys[value];
             });
             store.replace('videos', video['id'], video);
@@ -164,13 +164,16 @@ videos.route('/:id')
     .delete((req, res, next) => {
         req.body['id'] = req.body['id'] || req.params.id;
         util.exists(req.body['id'], res, () => {
+            store.remove('videos', req.body['id']);
             const comments = store.select('comments');
+            if(!comments) {
+                return;
+            }
             comments.forEach((value) => {
                 if(value.videoId == req.body['id']) {
                     store.remove('comments', value.id);
                 }
             });
-            store.remove('videos', req.body['id']);
         }, next);
         next();
     })
