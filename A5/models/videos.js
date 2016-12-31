@@ -6,7 +6,7 @@ const Schema = mongoose.Schema;
 const VideoSchema = new Schema({
     // _id: {type: String, required: true},
     title: {type: String, required: true},
-    description: {type: String, required: false},
+    description: {type: String, required: false, default: ""},
     src: {type: String, required: true},
     length: {type: Number, required: true, min: [0, "Length too small"]},
     playcount: {type: Number, required: false, min: [0, "Playcount too small"], default: 0},

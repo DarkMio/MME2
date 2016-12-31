@@ -106,14 +106,39 @@ const errNotAllowed = util.errorFactory("Method not allowed", 405);
 
 videos.route('/')
     .get((req, res, next) => {
-        VideoModel.find({}, function(err, videos) {
+        let filterGroup = "";
+        let limit = -1;
+        let offset = -1;
+        if(req.query['filter']) {
+            filterGroup = req.query['filter'].split(',').join(" ");
+        }
+
+        if(req.query['limit']) {
+            limit = parseInt(req.query['limit']) || 0;
+            if(isNaN(limit) || limit < 1) {
+                next(util.errorFactory("Limit is invalid", 400));
+                return;
+            }
+        }
+
+        if(req.query['offset']) {
+            offset = parseInt(req.query['offset']);
+            if(isNaN(offset) || offset < 0) {
+                next(util.errorFactory("Offset is invalid", 400));
+                return;
+            }
+        }
+
+        VideoModel.find({}, filterGroup, function(err, videos) {
             if(!err) {
                 res.locals.items = videos;
                 next();
             } else {
                 next(err);
             }
-        });
+        })
+        .limit(limit)
+        .skip(offset);
     })
     .post((req, res, next) => {
         const video = new VideoModel(req.body);
@@ -141,7 +166,7 @@ videos.route('/:id')
         req.body['_id'] = req.body['_id'] || req.params.id;
         VideoModel.find({_id: req.body['_id']}, function(err, videos) {
             if(!err) {
-                res.locals.items = videos;
+                res.locals.items = videos[0];
                 next();
             } else {
                 next(err);
@@ -153,11 +178,13 @@ videos.route('/:id')
     })
     .put((req, res, next) => {
         // req.body['_id'] = req.body['_id'] || req.params.id;
-        console.log("Go suck my dick.");
-
+        const schema = Object.keys(VideoModel.schema.paths);
+        const body = Object.keys(req.body);
+        if(!Object.keys(VideoModel.schema.paths).every((x) => { return Object.keys(req.body).indexOf(x) >= 0 })) {
+            next(util.errorFactory("Not all keys are present.", 400));
+        }
         delete req.body.timestamp;
         delete req.body._id;
-        // const video = new VideoModel(req.body);
         VideoModel.findByIdAndUpdate(req.params.id, req.body, {new: true, setDefaultsOnInsert: true}, function(err, item) {
             if(!err) {
                 res.locals.items = item;
@@ -180,27 +207,17 @@ videos.route('/:id')
         });
     })
     .patch((req, res, next) => {
-        /**
-         * Note: That's not my fault, but the assignments what's happening in here. :(
-         * Sane recommendation:
-         * Request Header with Session ID
-         * {
-         *  "action": "increment",
-         *  "field": "playcount",
-         *  "actionUUID": some form of hash of session ID + timestamp
-         * }
-         * This prevents many edge cases, including a client loosing connection and sending multiple increments
-         */
-        if(req.body['playcount'] !== "+1") {
-            next(util.errorFactory("Patch does not confine the given standard", 400));
-            return;
-        }
-        util.exists(req.params.id, res, (element) => {
-            element.playcount += 1;
-            store.replace('videos', element['id'], element);
-            res.locals.items = element;
-        });
-        next();
+        req.body['_id'] = req.body['_id'] || req.params.id;
+        delete req.body.timestamp;
+        delete req.body._id;
+        VideoModel.findByIdAndUpdate(req.params.id, req.body, function(err, item) {
+            if(!err) {
+                res.locals.items = item;
+                next();
+            } else {
+                next(err);
+            }
+        })
     });
 
 module.exports = videos;

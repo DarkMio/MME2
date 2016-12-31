@@ -18,6 +18,8 @@ const router = require('express').Router();
  * @param item the item that the filter should be applied on
  * @param next The next handler in case there are some errors.
  **/
+
+/*
 const filter = (filters, item, next) => {
     if (!filters.every((value) => { return item[value] && item[value] !== 'undefined'; })) { // item[value] && item[value] !== 'undefined'})){
         const err = new Error("There is no fucking filter for that.");
@@ -74,6 +76,7 @@ const errors = function(){
 /**
  * First and foremost: Catch the obvious error cases - bundles what may end in boiler plate
  */
+/*
 router.use((req, res, next) => {
     if(!res.locals.items) {
         if(moreThanExclusions(req.query)) {
@@ -96,6 +99,7 @@ router.use((req, res, next) => {
  * Now we handle the search first - this produces the final result-set and ensures that the client
  * can set limit and offset on that set - and gets rid of weird behaviour
  */
+/*
 router.use(function(req, res, next){
     // matching search criteria (for arrays only)
     if(Array.isArray(res.locals.items) && moreThanExclusions(req.query)) {
@@ -124,6 +128,7 @@ router.use(function(req, res, next){
  * Now we filter our result out by the given criteria.
  * This works for any object or array.
  */
+/*
 router.use(function(req, res, next) {
     if(req.query['filter']) {
         // ex: "title,src,length"
@@ -148,6 +153,7 @@ router.use(function(req, res, next) {
 /**
  * And lastly we do the limit and offset. this could be before filtering for performance (probably)
  */
+/*
 router.use(function(req, res, next) {
     if((req.query['limit'] || req.query['offset']) && Array.isArray(res.locals.items)) {
         const setLimit = !!req.query['limit'];
@@ -179,7 +185,7 @@ router.use(function(req, res, next) {
     }
     next();
 });
-
+*/
 router.use(function(req, res, next){
     if (res.locals.items) {
         // then we send it as json and remove it
