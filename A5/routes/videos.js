@@ -108,7 +108,7 @@ videos.route('/')
     .get((req, res, next) => {
         let filterGroup = "";
         let limit = -1;
-        let offset = -1;
+        let offset = 0;
         if(req.query['filter']) {
             filterGroup = req.query['filter'].split(',').join(" ");
         }
